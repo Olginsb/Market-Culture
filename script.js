@@ -1,25 +1,54 @@
-let dataJson1 = [
-    {'name': 'KE', 'value': '50', 'color': 'rgba(0,255,0, 0.5)'},
-    {'name': 'KV', 'value': '35', 'color': 'rgba(0,255,0, 0.5)'},
-    {'name': 'WE', 'value': '21', 'color': 'rgba(255,0,0, 0.5)'},
-    {'name': 'WdW', 'value': '27', 'color': 'rgba(255,0,0, 0.5)'},
-    {'name': 'PS', 'value': '30', 'color': 'rgba(255,0,255, 0.5)'},
-    {'name': 'E', 'value': '53', 'color': 'rgba(0,0,128, 0.5)'},
-    {'name': 'FZ', 'value': '22', 'color': 'rgba(0,0,128, 0.5)'},
-    {'name': 'SA', 'value': '29', 'color': 'rgba(0,0,128, 0.5)'},
-]
-let dataJson2 = [
-    {'name': 'KE', 'value': '100', 'color': 'rgba(0,255,0, 0.5)'},
-    {'name': 'KV', 'value': '100', 'color': 'rgba(0,255,0, 0.5)'},
-    {'name': 'WE', 'value': '100', 'color': 'rgba(255,0,0, 0.5)'},
-    {'name': 'WdW', 'value': '100', 'color': 'rgba(255,0,0, 0.5)'},
-    {'name': 'PS', 'value': '100', 'color': 'rgba(255,0,255, 0.5)'},
-    {'name': 'E', 'value': '100', 'color': 'rgba(0,0,128, 0.5)'},
-    {'name': 'FZ', 'value': '100', 'color': 'rgba(0,0,128, 0.5)'},
-    {'name': 'SA', 'value': '100', 'color': 'rgba(0,0,128, 0.5)'},
-]
+let btn = document.querySelector('.submit');
+let dataJson1 = [];
+let dataJson2 = [];
+let opacity = dataJson1.map(dataName => dataName.value)/100;
+
+function addChartValue() {
+    let data1 = this.dataJson1;
+    let list = this.getChartVal();
+    localStorage.setItem('chartVal', JSON.stringify(list));
+}
+
+function getChartVal (){
+    const chartData = localStorage.getItem('chartVal');
+    let list = [];
+    if (chartData) {
+        try {
+            list = JSON.parse(chartData) || [];
+        } catch (error){}
+    }
+    return list;
+}
+btn.onclick =  (event) => {
+    event.preventDefault();
+    let form = document.querySelector('form');
+    let obj = {};
+    let obj2 = {};
+
+    let color = form.elements.inputColor.value;
+    let rgbaCol = 'rgba(' + parseInt(color.slice(-6, -4), 16) + ',' + parseInt(color.slice(-4, -2), 16) + ',' + parseInt(color.slice(-2), 16) + ',' + '0.5' + ')';
+
+    obj.name = form.elements.inputName.value;
+    obj.value = form.elements.inputValue.value;
+    obj.color = 'rgba(' + parseInt(form.elements.inputColor.value.slice(-6, -4), 16) + ',' + parseInt(color.slice(-4, -2), 16) + ',' + parseInt(color.slice(-2), 16) + ',' + '0.5' + ')';
+
+    obj2.name = form.elements.inputName.value;
+    obj2.value = '100';
+    obj2.color = 'rgba(' + parseInt(form.elements.inputColor.value.slice(-6, -4), 16) + ',' + parseInt(color.slice(-4, -2), 16) + ',' + parseInt(color.slice(-2), 16) + ',' + '0.8' + ')';
+
+    this.dataJson1 += dataJson1.push(obj);
+    this.dataJson2 +=dataJson2.push(obj2);
+
+    form.elements.inputName.value = '';
+    form.elements.inputValue.value = '';
+    updateChart();
+    // addChartValue();
+
+}
+
 
 var ctx = document.getElementById('myChart').getContext('2d');
+
 var chart = new Chart(ctx, {
     // The type of chart we want to create
     type: 'radar',
@@ -34,21 +63,19 @@ var chart = new Chart(ctx, {
                 backgroundColor: 'rgba(0, 0, 0, 0)',
                 pointBackgroundColor: dataJson2.map(dataName => dataName.color),
                 pointBorderColor: "#fff",
-                radius: 5,
-                pointRadius: 30,
-                pointHoverRadius: 30,
-                borderWidth: 3,
+                pointRadius:20,
+                pointBorderWidth: 1,
+                borderWidth: 1,
                 data: dataJson2.map(dataName => dataName.value)
             },
             {
+                label: '',
                 fill: 'none',
                 backgroundColor: 'rgba(0, 0, 0, 0)',
                 pointBackgroundColor: dataJson1.map(dataName => dataName.color),
                 pointBorderColor: "#fff",
-                radius: 5,
-                pointRadius: 15,
-                pointHoverRadius: 15,
                 borderWidth: 1,
+                pointRadius: 10,
                 data: dataJson1.map(dataName => dataName.value)
 
             },
@@ -72,3 +99,15 @@ var chart = new Chart(ctx, {
         }
     }
 });
+function updateChart() {
+    chart.data.datasets[0].data = dataJson2.map(dataName => dataName.value);
+    chart.data.datasets[1].data = dataJson1.map(dataName => dataName.value);
+    chart.data.labels = dataJson2.map(dataName => dataName.name);
+    chart.data.datasets[0].pointBackgroundColor = dataJson2.map(dataName => dataName.color);
+    chart.data.datasets[1].pointBackgroundColor = dataJson1.map(dataName => dataName.color);
+
+    //This is an implementation of resizing for circles, but this does not work in this library.
+    //chart.data.datasets[1].pointRadius = dataJson1.map(dataName => dataName.value)*25/100;
+
+    chart.update();
+}

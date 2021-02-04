@@ -21,3 +21,9 @@ img {
     height: 50%;
     justify-content: space-around;
 }
+.main-form {
+    margin: 0 auto;
+    padding: 10px;
+    width: 50%;
+    height: 50%;
+}
